@@ -1,0 +1,121 @@
+v {xschem version=3.4.8RC file_version=1.2}
+G {}
+K {type=subcircuit
+format="@name @pinlist @symname"
+template="name=x1"
+}
+V {}
+S {}
+E {}
+L 4 -300 -290 -300 -140 {}
+L 4 -300 -290 -90 -220 {}
+L 4 -300 -140 -90 -220 {}
+L 7 -100 -220 -80 -220 {}
+L 7 -320 -250 -300 -250 {}
+L 7 -320 -180 -300 -180 {}
+L 7 -170 -200 -170 -180 {}
+B 5 -82.5 -222.5 -77.5 -217.5 {name=vop dir=inout}
+B 5 -322.5 -252.5 -317.5 -247.5 {name=vip dir=inout}
+B 5 -172.5 -182.5 -167.5 -177.5 {name=vom dir=inout}
+B 5 -322.5 -182.5 -317.5 -177.5 {name=vim dir=inout}
+T {@name} -205 -242 0 0 0.2 0.2 {}
+T {vop} -105 -224 0 1 0.2 0.2 {}
+T {vip} -295 -246 2 1 0.2 0.2 {}
+T {vim} -295 -176 2 1 0.2 0.2 {}
+T {vom} -164 -195 3 1 0.2 0.2 {}
+T {@symname} -287.5 -226 0 0 0.3 0.3 {}
+N -710 -160 -710 -130 {lab=GND}
+N -710 -250 -710 -220 {lab=vnmic}
+N -710 -250 -640 -250 {lab=vnmic}
+N -580 -250 -520 -250 {lab=vn1}
+N -460 -250 -420 -250 {lab=vn2}
+N -260 -480 -250 -480 {lab=vout}
+N -250 -480 -240 -480 {lab=vout}
+N -240 -480 -240 -380 {lab=vout}
+N -260 -400 -240 -400 {lab=vout}
+N -340 -480 -320 -480 {lab=virt}
+N -340 -400 -320 -400 {lab=virt}
+N -30 -350 -30 -310 {lab=vout}
+N -130 -350 -30 -350 {lab=vout}
+N -30 -250 -30 -210 {lab=GND}
+N -320 -180 -320 -90 {lab=#net1}
+N -320 -30 -320 -10 {lab=GND}
+N -360 -250 -320 -250 {lab=virt}
+N -340 -480 -340 -400 {lab=virt}
+N -340 -400 -340 -330 {lab=virt}
+N -340 -330 -340 -250 {lab=virt}
+N -240 -380 -240 -350 {lab=vout}
+N -240 -350 -130 -350 {lab=vout}
+N -80 -220 -70 -350 {lab=vout}
+N -170 -180 -170 -120 {lab=GND}
+C {vsource.sym} -710 -190 0 0 {name=vnmic value="0 AC 1 sin(0 1m 1e3 0 0 0)" savecurrent=false}
+C {res.sym} -610 -250 3 0 {name=R1
+value=380
+footprint=1206
+device=resistor
+m=1}
+C {capa.sym} -490 -250 3 0 {name=C1
+m=1
+value=4.7u
+footprint=1206
+device="ceramic capacitor"}
+C {res.sym} -390 -250 3 0 {name=R2
+value=4.7k
+footprint=1206
+device=resistor
+m=1}
+C {gnd.sym} -710 -130 0 0 {name=l1 lab=GND}
+C {lab_wire.sym} -680 -250 0 0 {name=p1 sig_type=std_logic lab=vnmic}
+C {lab_wire.sym} -550 -250 0 0 {name=p2 sig_type=std_logic lab=vn1}
+C {lab_wire.sym} -440 -250 0 0 {name=p3 sig_type=std_logic lab=vn2}
+C {res.sym} -290 -400 3 0 {name=R3
+value=300k
+footprint=1206
+device=resistor
+m=1}
+C {capa.sym} -290 -480 3 0 {name=C3
+m=1
+value=27p
+footprint=1206
+device="ceramic capacitor"}
+C {lab_wire.sym} -340 -330 0 0 {name=p5 sig_type=std_logic lab=virt}
+C {capa.sym} -30 -280 0 0 {name=C2
+m=1
+value=1p
+footprint=1206
+device="ceramic capacitor"}
+C {gnd.sym} -30 -210 0 0 {name=l4 lab=GND}
+C {lab_wire.sym} -80 -350 0 0 {name=p6 sig_type=std_logic lab=vout}
+C {vsource.sym} -320 -60 0 0 {name=V2 value=1.5 savecurrent=false}
+C {gnd.sym} -320 -10 0 0 {name=l2 lab=GND}
+C {gnd.sym} -170 -120 0 0 {name=l3 lab=GND}
+C {simulator_commands_shown.sym} 10 -490 0 0 {name=COMMANDS
+simulator=ngspice
+only_toplevel=false 
+value="
+* ngspice commands
+.control 
+OP
+save all
+write Complete_ckt.raw
+set appendwrite
+Ac DEC 100 1 10e6
+plot vdb(vout)
+plot v(vout)
+plot phase(vout)
+MEAS AC gain_db MAX vdb(vout) FROM=1 TO=10e6
+LET vm3db = gain_db-3.0
+print vm3db
+MEAS AC fzero WHEN vdb(vout)=vm3db RISE=1
+MEAS AC fpole WHEN vdb(vout)=vm3db FALL=1
+** phase measurement
+LET phase_deg = cph(vout)*180/PI
+MEAS AC phase_zero FIND phase_deg AT=fzero
+MEAS AC phase_pole FIND phase_deg AT=fpole
+MEAS AC phase_mid FIND phase_deg AT=fmid
+** MEAS fero fpole using phase
+LET phase_zero_ph = phase_mid - 45
+MEAS AC fzero_ph WHEN phase_deg=phase_zero_ph
+.endc
+.end
+"}
